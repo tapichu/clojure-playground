@@ -19,10 +19,11 @@
 
 (defn run-game [game screen]
   (loop [{:keys [input uis] :as game} game]
-    (when-not (empty? uis)
-      (draw-game game screen)
+    (when (seq uis)
       (if (nil? input)
-        (recur (get-input (update-in game [:world] tick-all) screen))
+        (do
+          (draw-game game screen)
+          (recur (get-input (update-in game [:world] tick-all) screen)))
         (recur (process-input (dissoc game :input) input))))))
 
 
@@ -32,6 +33,7 @@
 
 
 (defn main
+  ([] (main :swing false))
   ([screen-type] (main screen-type false))
   ([screen-type block?]
    (letfn [(go []

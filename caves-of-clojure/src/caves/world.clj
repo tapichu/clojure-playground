@@ -12,17 +12,15 @@
    :wall  (->Tile :wall  "#" :white)
    :bound (->Tile :bound "X" :black)})
 
-(defn get-tile [tiles x y]
+; Convenience functions -------------------------------------------------------
+(defn get-tile-from-tiles [tiles [x y]]
   (get-in tiles [y x] (:bound tiles)))
 
-; Debugging -------------------------------------------------------------------
-(defn print-row [row]
-  (println (apply str (map :glyph row))))
+(defn random-coordinate []
+  (let [[cols rows] world-size]
+    [(rand-int cols) (rand-int rows)]))
 
-(defn print-world [world]
-  (dorun (map print-row (:tiles world))))
-
-; World -----------------------------------------------------------------------
+; World generation ------------------------------------------------------------
 (defn random-tiles []
   (let [[cols rows] world-size]
     (letfn [(random-tile []
@@ -46,8 +44,7 @@
     [(+ x dx) (+ y dy)]))
 
 (defn get-block [tiles x y]
-  (map (fn [[x y]]
-         (get-tile tiles x y))
+  (map (partial get-tile-from-tiles tiles)
        (block-coords x y)))
 
 (defn get-smoothed-row [tiles y]
@@ -65,5 +62,25 @@
 
 (defn random-world []
   (let [world (->World (random-tiles))
-        world (nth  (iterate smooth-world world) 0)]
+        world (nth (iterate smooth-world world) 3)]
     world))
+
+; Querying a world ------------------------------------------------------------
+(defn get-tile [world coord]
+  (get-tile-from-tiles (:tiles world) coord))
+
+(defn get-tile-kind [world coord]
+  (:kind (get-tile world coord)))
+
+(defn set-tile [world [x y] tile]
+  (assoc-in world [:tiles y x] tile))
+
+(defn set-tile-floor [world coord]
+  (set-tile world coord (:floor tiles)))
+
+
+(defn find-empty-tile [world]
+  (loop [coord (random-coordinate)]
+    (if (#{:floor} (get-tile-kind world coord))
+      coord
+      (recur (random-coordinate)))))

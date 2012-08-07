@@ -7,5 +7,5 @@
                  ; [com.googlecode.lanterna/lanterna "2.0.1-SNAPSHOT"]
                  ]
   ; :repositories {"sonatype-snapshots" "https://oss.sonatype.org/content/repositories/snapshots"}
-  ; :main caves.core
+  :main ^{:skip-aot true} caves.core
   )
